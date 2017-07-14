@@ -85,7 +85,7 @@ Magento_OfflineShippingSampleData
 AvS_DisableModules
 ```
 
-No other modules have any dependencies declared to any of those modules, so they can be removed savely (in theory). 
+No other modules have any dependencies declared to any of those modules, so they can be removed safely (in theory). 
 To remove them, add `bin/magento module:disable ` in front of the module name you want to remove, i.e.:
 
 ```
