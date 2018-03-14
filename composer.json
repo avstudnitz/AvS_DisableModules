@@ -2,7 +2,7 @@
     "name": "avstudnitz/disable-modules",
     "description": "N/A",
     "require": {
-        "magento/framework": "~100.0|~101.0"
+        "magento/framework": "*"
     },
     "type": "magento2-module",
     "version": "1.0.0",
