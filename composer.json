@@ -1,11 +1,10 @@
 {
     "name": "avstudnitz/disable-modules",
-    "description": "N/A",
+    "description": "Adds a console command to show all modules which can be safely disabled as they have no declared dependencies",
     "require": {
         "magento/framework": "~100.0|~101.0"
     },
     "type": "magento2-module",
-    "version": "1.0.0",
     "license": [
         "OSL-3.0"
     ],
