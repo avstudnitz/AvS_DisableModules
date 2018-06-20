@@ -2,6 +2,7 @@
 namespace AvS\DisableModules\Console\Report\RemovableModules;
 
 use Magento\Setup\Module\Dependency\Parser\Composer\Json;
+use Symfony\Component\Console\Output\ConsoleOutput;
 
 class Parser extends Json
 {
@@ -29,7 +30,12 @@ class Parser extends Json
 
         foreach ($options['files_for_parse'] as $file) {
             $package = $this->getModuleComposerPackage($file);
-            $magentoModuleName = $this->extractMagentoModuleName($file);
+            try {
+                $magentoModuleName = $this->extractMagentoModuleName($file);
+            } catch (\Exception $e) {
+                $output = new ConsoleOutput;
+                $output->writeln("<comment>{$e->getMessage()}</comment> Skipping...");
+            }
             $this->moduleNamesByComposerName[$this->extractModuleName($package)] = $magentoModuleName;
         }
 
