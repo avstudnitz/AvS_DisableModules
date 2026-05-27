@@ -8,11 +8,12 @@ use Magento\Framework\App\Utility\Files;
 use Magento\Framework\Component\ComponentRegistrar;
 use Magento\Framework\Component\ComponentRegistrarInterface;
 use Magento\Framework\Component\DirSearch;
+use Magento\Framework\Console\Cli;
 use Magento\Framework\View\Design\Theme\ThemePackageList;
+use Magento\Setup\Module\Dependency\Report\Dependency;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Magento\Setup\Module\Dependency\Report\Dependency;
 
 /**
  * Command for showing nmodules which can be removed / disabled
@@ -108,19 +109,21 @@ class DependenciesShowRemovableCommand extends \Symfony\Component\Console\Comman
     /**
      * {@inheritdoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
             Files::setInstance(new Files($this->registrar, $this->dirSearch, $this->themePackageList));
             $this->buildReport($input->getOption(self::INPUT_KEY_OUTPUT));
             $output->writeln('<info>Report successfully processed. File "' . $input->getOption(self::INPUT_KEY_OUTPUT) . '" generated.</info>');
+
+            return Cli::RETURN_SUCCESS;
         } catch (\Exception $e) {
             $output->writeln(
                 '<error>Please check the path you provided. Removable Modules report generator failed with error: ' .
                 $e->getMessage() . '</error>'
             );
             // we must have an exit code higher than zero to indicate something was wrong
-            return \Magento\Framework\Console\Cli::RETURN_FAILURE;
+            return Cli::RETURN_FAILURE;
         }
     }
 
