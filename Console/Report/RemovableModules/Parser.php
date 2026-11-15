@@ -3,6 +3,7 @@ namespace AvS\DisableModules\Console\Report\RemovableModules;
 
 use Magento\Setup\Module\Dependency\Parser\Composer\Json;
 use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class Parser extends Json
 {
@@ -13,8 +14,9 @@ class Parser extends Json
     private $moduleManager;
 
     /**
-     * @var \Magento\Framework\Module\ModuleListInterface
+     * @var OutputInterface|null
      */
+    private $output;
 
     public function __construct(\Magento\Framework\Module\Manager $moduleManager)
     {
@@ -27,14 +29,16 @@ class Parser extends Json
     public function parse(array $options)
     {
         $this->checkOptions($options);
+        $this->output = $options['output'] ?? new ConsoleOutput();
+        $this->moduleNamesByComposerName = [];
 
         foreach ($options['files_for_parse'] as $file) {
             $package = $this->getModuleComposerPackage($file);
             try {
                 $magentoModuleName = $this->extractMagentoModuleName($file);
             } catch (\Exception $e) {
-                $output = new ConsoleOutput;
-                $output->writeln("<comment>{$e->getMessage()}</comment> Skipping...");
+                $this->output->writeln("<comment>{$e->getMessage()}</comment> Skipping...");
+                continue;
             }
             $this->moduleNamesByComposerName[$this->extractModuleName($package)] = $magentoModuleName;
         }
@@ -43,6 +47,9 @@ class Parser extends Json
         foreach ($options['files_for_parse'] as $file) {
             $package = $this->getModuleComposerPackage($file);
             $composerName = $this->extractModuleName($package);
+            if (!isset($this->moduleNamesByComposerName[$composerName])) {
+                continue;
+            }
             $magentoModuleName = $this->moduleNamesByComposerName[$composerName];
             if (!$this->isModuleEnabled($magentoModuleName)) {
                 continue;
@@ -85,7 +92,13 @@ class Parser extends Json
         $requires = $package->get('require', '/.+\/module-/');
         if ($requires) {
             foreach ($requires as $key => $value) {
-
+                if (!isset($this->moduleNamesByComposerName[$key])) {
+                    $this->output->writeln(
+                        '<comment>Module name for composer name "' . $key . '" not found.</comment> Skipping...',
+                        OutputInterface::VERBOSITY_VERBOSE
+                    );
+                    continue;
+                }
                 $magentoModuleName = $this->getModuleNameByComposerName($key);
                 if (!$this->isModuleEnabled($magentoModuleName)) {
                     continue;
