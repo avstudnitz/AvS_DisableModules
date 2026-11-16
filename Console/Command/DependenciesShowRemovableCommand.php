@@ -113,7 +113,7 @@ class DependenciesShowRemovableCommand extends \Symfony\Component\Console\Comman
     {
         try {
             Files::setInstance(new Files($this->registrar, $this->dirSearch, $this->themePackageList));
-            $this->buildReport($input->getOption(self::INPUT_KEY_OUTPUT));
+            $this->buildReport($input->getOption(self::INPUT_KEY_OUTPUT), $output);
             $output->writeln('<info>Report successfully processed. File "' . $input->getOption(self::INPUT_KEY_OUTPUT) . '" generated.</info>');
 
             return Cli::RETURN_SUCCESS;
@@ -131,15 +131,16 @@ class DependenciesShowRemovableCommand extends \Symfony\Component\Console\Comman
      * Build Framework dependencies report
      *
      * @param string $outputPath
+     * @param OutputInterface|null $output
      * @return void
      */
-    protected function buildReport($outputPath)
+    protected function buildReport($outputPath, ?OutputInterface $output = null)
     {
         $filesForParse = Files::init()->getComposerFiles(ComponentRegistrar::MODULE, false);
 
         $this->getBuilder()->build(
             [
-                'parse' => ['files_for_parse' => $filesForParse],
+                'parse' => array_filter(['files_for_parse' => $filesForParse, 'output' => $output]),
                 'write' => ['report_filename' => $outputPath],
             ]
         );
